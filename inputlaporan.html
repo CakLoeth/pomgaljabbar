@@ -18,7 +18,7 @@
     <!-- Firebase SDKs -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, collection, doc, onSnapshot, addDoc, setDoc, deleteDoc, query, where, getDoc, getDocs } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
         import { setLogLevel } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
         setLogLevel('debug');
@@ -76,15 +76,6 @@
                 console.error("Error fetching users data: ", error);
             });
         };
-        
-        const handleLogout = async () => {
-            try {
-                await signOut(auth);
-                console.log("User signed out successfully.");
-            } catch (error) {
-                console.error("Error signing out:", error);
-            }
-        };
 
         const initFirebase = async () => {
             if (Object.keys(firebaseConfig).length > 0) {
@@ -97,17 +88,12 @@
                     if (user) {
                         userId = user.uid;
                         console.log("Authenticated user:", userId);
-                        document.getElementById('user-id-display').textContent = userId;
                         // Setup listeners only after successful authentication
                         setupFinanceListener();
                         setupUsersListener();
                     } else {
                         userId = null;
-                        document.getElementById('user-id-display').textContent = 'N/A';
                         console.log("User signed out or authentication failed.");
-                        // Optional: Clear UI or redirect if user is logged out
-                        renderTable([]);
-                        renderUsersTable([]);
                     }
                 });
                 
@@ -191,33 +177,13 @@
                     </svg>
                     <span class="text-sm lg:text-base">Pengaturan Pengguna</span>
                 </a>
-                <!-- Tombol Logout -->
-                <button id="nav-logout" class="flex flex-col lg:flex-row items-center justify-center lg:justify-start px-4 py-2 text-red-600 hover:text-red-800 rounded-lg transition-colors duration-200">
-                  <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 lg:mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-                  </svg>
-                  <span class="text-sm lg:text-base">Keluar</span>
-                    </button>
+            </nav>
+        </div>
+        <div class="mt-4 lg:mt-8 p-2 rounded-lg bg-gray-200 text-xs text-gray-700 text-center break-words">
+            User ID: <span id="user-id-display" class="font-mono font-bold"></span>
+        </div>
+    </aside>
 
-<!-- Script Logout Firebase -->
-<script type="module">
-  import { getAuth, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-
-  const auth = getAuth();
-
-  document.getElementById("nav-logout").addEventListener("click", async (e) => {
-    e.preventDefault();
-    try {
-      await signOut(auth); // logout Firebase
-      window.location.href = "index.html"; // arahkan ke login
-    } catch (error) {
-      console.error("Error saat logout:", error);
-    }
-  });
-</script>
-                    
-
-    
     <!-- Konten Utama -->
     <main class="flex-1 p-6 lg:p-10 pb-20 lg:pb-10">
         <header class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6">
@@ -460,7 +426,6 @@
         const navInput = document.getElementById('nav-input');
         const navLaporan = document.getElementById('nav-laporan');
         const navPengaturan = document.getElementById('nav-pengaturan');
-        const navLogout = document.getElementById('nav-logout');
         const dashboardSection = document.getElementById('dashboard-section');
         const grafikSection = document.getElementById('grafik-section');
         const inputSection = document.getElementById('input-section');
@@ -552,14 +517,6 @@
             e.preventDefault();
             showSection('pengaturan-pengguna-section');
         });
-        navLogout.addEventListener('click', (e) => {
-            e.preventDefault();
-            window.auth.signOut().then(() => {
-                console.log("User signed out successfully.");
-            }).catch((error) => {
-                console.error("Error signing out:", error);
-            });
-        });
 
         // Fungsi untuk merender tabel laporan keuangan
         const renderTable = (data) => {
@@ -624,6 +581,9 @@
             const totalIncomeEl = document.getElementById('total-income');
             const totalExpenseEl = document.getElementById('total-expense');
             const totalBalanceEl = document.getElementById('total-balance');
+            const userIdDisplay = document.getElementById('user-id-display');
+
+            userIdDisplay.textContent = window.userId() || 'N/A';
 
             let totalIncome = 0;
             let totalExpense = 0;
@@ -1198,38 +1158,41 @@
         // Saran Anggaran Cerdas
         generateBudgetBtn.addEventListener('click', async () => {
             const totalIncomeStr = document.getElementById('total-income').textContent;
-            const totalIncome = parseFloat(totalIncomeStr.replace(/Rp /g, '').replace(/\./g, '').replace(/,/g, ''));
-            
-            if (totalIncome === 0 || isNaN(totalIncome)) {
-                budgetSuggestionEl.textContent = "Tidak ada pemasukan untuk membuat saran anggaran. Silakan tambahkan data pemasukan terlebih dahulu.";
+            const totalIncome = parseFloat(totalIncomeStr.replace(/[Rp\s,.]/g, '') || '0');
+
+            if (totalIncome === 0) {
+                budgetSuggestionEl.textContent = "Total pemasukan Anda Rp 0. Silakan tambahkan data pemasukan terlebih dahulu untuk mendapatkan saran anggaran.";
                 return;
             }
 
             generateBudgetBtn.disabled = true;
             generateBudgetText.classList.add('hidden');
             generateBudgetLoading.classList.remove('hidden');
-            
-            const prompt = `Berdasarkan total pemasukan sebesar Rp ${totalIncome.toLocaleString('id-ID')}, buatlah saran alokasi anggaran bulanan dengan persentase untuk setiap kategori: "pemasukan", "pengeluaran", "tabungan", dan "lain-lain". Sertakan juga ringkasan teks singkat (kurang dari 50 kata) yang menjelaskan saran tersebut. Berikan respons dalam format JSON dengan properti 'pemasukan', 'pengeluaran', 'tabungan', 'lain_lain', dan 'summary'.`;
-            
+
+            const prompt = `Berikan saran anggaran bulanan untuk total pemasukan sebesar Rp ${totalIncome.toLocaleString('id-ID')}. Berikan saran alokasi untuk kategori 'pemasukan', 'pengeluaran', 'tabungan', dan 'lain_lain' sebagai persentase dari total pemasukan. Pastikan total persentase adalah 100%. Setelah itu, berikan ringkasan singkat dalam satu kalimat. Tampilkan hasilnya dalam format JSON.`;
+
             try {
-                const budgetSuggestion = await callGeminiAPI(prompt, true);
-                if (budgetSuggestion) {
-                    const { pemasukan, pengeluaran, tabungan, lain_lain, summary } = budgetSuggestion;
-                    budgetSuggestionEl.innerHTML = `
-                        <p class="font-bold">Saran Alokasi:</p>
-                        <ul>
-                            <li>Pemasukan: ${pemasukan}%</li>
-                            <li>Pengeluaran: ${pengeluaran}%</li>
-                            <li>Tabungan: ${tabungan}%</li>
-                            <li>Lain-lain: ${lain_lain}%</li>
-                        </ul>
-                        <p class="mt-2 text-sm">${summary}</p>
-                    `;
-                } else {
-                    throw new Error("No budget suggestion data received.");
-                }
+                const budgetData = await callGeminiAPI(prompt, true);
+                const pemasukan = (budgetData.pemasukan * totalIncome) / 100;
+                const pengeluaran = (budgetData.pengeluaran * totalIncome) / 100;
+                const tabungan = (budgetData.tabungan * totalIncome) / 100;
+                const lain_lain = (budgetData.lain_lain * totalIncome) / 100;
+                const summary = budgetData.summary;
+
+                const suggestionText = `
+                    <p>Berdasarkan total pemasukan Anda sebesar ${totalIncomeStr}, berikut adalah saran anggaran bulanan:</p>
+                    <ul class="list-disc list-inside mt-2 space-y-1">
+                        <li>Pemasukan: Rp ${pemasukan.toLocaleString('id-ID')} (${budgetData.pemasukan}%)</li>
+                        <li>Pengeluaran: Rp ${pengeluaran.toLocaleString('id-ID')} (${budgetData.pengeluaran}%)</li>
+                        <li>Tabungan: Rp ${tabungan.toLocaleString('id-ID')} (${budgetData.tabungan}%)</li>
+                        <li>Lain-lain: Rp ${lain_lain.toLocaleString('id-ID')} (${budgetData.lain_lain}%)</li>
+                    </ul>
+                    <p class="mt-4 font-semibold">${summary}</p>
+                `;
+                budgetSuggestionEl.innerHTML = suggestionText;
+
             } catch (error) {
-                budgetSuggestionEl.textContent = "Maaf, terjadi kesalahan saat membuat saran anggaran. Silakan coba lagi.";
+                budgetSuggestionEl.textContent = "Terjadi kesalahan saat membuat saran anggaran. Silakan coba lagi.";
                 console.error(error);
             } finally {
                 generateBudgetBtn.disabled = false;
@@ -1239,5 +1202,6 @@
         });
     });
 </script>
+
 </body>
 </html>
