@@ -98,23 +98,28 @@
             }
         }
 
-        // Menangani pengiriman formulir login
-        loginForm.addEventListener('submit', function(event) {
-            event.preventDefault();
+// Menangani pengiriman formulir login
+loginForm.addEventListener('submit', function(event) {
+    event.preventDefault();
 
-            const usernameInput = document.getElementById('username').value;
-            const passwordInput = document.getElementById('password').value;
+    const usernameInput = document.getElementById('username').value;
+    const passwordInput = document.getElementById('password').value;
 
-            const foundUser = users.find(user => 
-                user.username === usernameInput && user.password === passwordInput
-            );
+    const foundUser = users.find(user => 
+        user.username === usernameInput && user.password === passwordInput
+    );
 
-            if (foundUser) {
-                showMessage(messageDiv, `Selamat datang, ${foundUser.username}! Role Anda adalah: ${foundUser.role}.`, false);
-            } else {
-                showMessage(messageDiv, 'Username atau password salah.', true);
-            }
-        });
+    if (foundUser) {
+        showMessage(messageDiv, `Selamat datang, ${foundUser.username}! Role Anda adalah: ${foundUser.role}.`, false);
+
+        // Redirect ke halaman setelah login berhasil
+        setTimeout(() => {
+            window.location.href = "https://cakloeth.github.io/cobaweb1/";
+        }, 1000); // delay 1 detik biar pesan sempat tampil
+    } else {
+        showMessage(messageDiv, 'Username atau password salah.', true);
+    }
+});
 
         // Menangani klik pada link "Lupa Password"
         forgotPasswordLink.addEventListener('click', function(event) {
