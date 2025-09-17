@@ -4,79 +4,149 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Halaman Login</title>
-    <!-- Memuat Tailwind CSS -->
+    <!-- Tailwind CSS CDN untuk styling modern dan responsif -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Memuat Font Inter dari Google Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Menggunakan font Inter dari Google Fonts -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
     <style>
-        /* Mengatur font default ke Inter */
         body {
             font-family: 'Inter', sans-serif;
+            background-color: #f3f4f6;
         }
     </style>
 </head>
-<body class="bg-gray-100 flex items-center justify-center min-h-screen">
-    
-    <!-- Kontainer utama untuk kartu login -->
-    <div class="bg-white p-8 rounded-xl shadow-lg w-full max-w-sm m-4">
+<body class="flex items-center justify-center min-h-screen p-4">
+
+    <!-- Kontainer utama halaman -->
+    <div class="bg-white rounded-xl shadow-lg p-8 w-full max-w-sm">
+        <h2 id="formTitle" class="text-3xl font-bold text-center mb-6 text-gray-800">Login</h2>
         
-        <!-- Header -->
-        <div class="text-center mb-8">
-            <h1 class="text-2xl font-bold text-gray-800">Selamat Datang Kembali!</h1>
-            <p class="text-gray-500 mt-2">Silakan masuk untuk melanjutkan.</p>
-        </div>
-        
-        <!-- Form Login -->
-        <form action="#" method="POST">
-            <!-- Input Email -->
+        <!-- Formulir Login -->
+        <form id="loginForm">
+            <!-- Input Username -->
             <div class="mb-4">
-                <label for="email" class="block text-gray-700 text-sm font-semibold mb-2">Alamat Email</label>
-                <input 
-                    type="email" 
-                    id="email" 
-                    name="email"
-                    placeholder="contoh@email.com"
-                    class="w-full px-4 py-2 border rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200"
-                    required
-                >
+                <label for="username" class="block text-sm font-medium text-gray-700 mb-1">Username</label>
+                <input type="text" id="username" name="username" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Masukkan username" required>
             </div>
             
             <!-- Input Password -->
             <div class="mb-6">
-                <div class="flex justify-between items-center">
-                    <label for="password" class="block text-gray-700 text-sm font-semibold mb-2">Kata Sandi</label>
-                    <a href="#" class="text-sm text-blue-600 hover:underline">Lupa Sandi?</a>
-                </div>
-                <input 
-                    type="password" 
-                    id="password" 
-                    name="password"
-                    placeholder="••••••••"
-                    class="w-full px-4 py-2 border rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-200"
-                    required
-                >
+                <label for="password" class="block text-sm font-medium text-gray-700 mb-1">Password</label>
+                <input type="password" id="password" name="password" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Masukkan password" required>
             </div>
             
+            <!-- Area pesan (untuk notifikasi sukses/gagal) -->
+            <div id="message" class="text-center mb-4 transition-all duration-300 ease-in-out"></div>
+
             <!-- Tombol Login -->
-            <div>
-                <button 
-                    type="submit"
-                    class="w-full bg-blue-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all duration-300 ease-in-out transform hover:scale-105"
-                >
-                    Masuk
-                </button>
+            <button type="submit" class="w-full bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg hover:bg-blue-700 transition duration-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
+                Login
+            </button>
+
+            <!-- Opsi tambahan (Lupa Password) -->
+            <div class="mt-4 text-center text-sm">
+                <a href="#" id="forgotPasswordLink" class="text-blue-600 hover:text-blue-700 hover:underline">Lupa Password?</a>
             </div>
         </form>
-        
-        <!-- Link untuk Daftar -->
-        <p class="text-center text-gray-500 text-sm mt-6">
-            Belum punya akun? 
-            <a href="#" class="text-blue-600 font-semibold hover:underline">Daftar di sini</a>
-        </p>
-        
+
+        <!-- Formulir Reset Password (tersembunyi secara default) -->
+        <form id="resetForm" class="hidden">
+            <div class="mb-4">
+                <label for="email" class="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                <input type="email" id="email" name="email" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Masukkan email terdaftar" required>
+            </div>
+            
+            <!-- Area pesan reset password -->
+            <div id="resetMessage" class="text-center mb-4 transition-all duration-300 ease-in-out"></div>
+
+            <!-- Tombol Kirim -->
+            <button type="submit" class="w-full bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg hover:bg-blue-700 transition duration-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
+                Kirim Email Reset
+            </button>
+            
+            <!-- Link kembali ke login -->
+            <div class="mt-4 text-center text-sm">
+                <a href="#" id="backToLoginLink" class="text-blue-600 hover:text-blue-700 hover:underline">Kembali ke Login</a>
+            </div>
+        </form>
     </div>
 
+    <script>
+        // Data pengguna disimulasikan dari file Excel.
+        const users = [
+            { username: 'user1', password: 'pass1', email: 'user1@mail.com', role: 'user' },
+            { username: 'admin1', password: 'admin123', email: 'admin@mail.com', role: 'admin' },
+            { username: 'user2', password: 'pass2', email: 'user2@mail.com', role: 'user' },
+        ];
+
+        // Mendapatkan elemen-elemen DOM
+        const formTitle = document.getElementById('formTitle');
+        const loginForm = document.getElementById('loginForm');
+        const resetForm = document.getElementById('resetForm');
+        const messageDiv = document.getElementById('message');
+        const resetMessageDiv = document.getElementById('resetMessage');
+        const forgotPasswordLink = document.getElementById('forgotPasswordLink');
+        const backToLoginLink = document.getElementById('backToLoginLink');
+
+        // Fungsi untuk menampilkan pesan
+        function showMessage(element, text, isError = false) {
+            element.textContent = text;
+            if (isError) {
+                element.className = 'text-center mb-4 transition-all duration-300 ease-in-out text-red-500 font-medium';
+            } else {
+                element.className = 'text-center mb-4 transition-all duration-300 ease-in-out text-green-500 font-medium';
+            }
+        }
+
+        // Menangani pengiriman formulir login
+        loginForm.addEventListener('submit', function(event) {
+            event.preventDefault();
+
+            const usernameInput = document.getElementById('username').value;
+            const passwordInput = document.getElementById('password').value;
+
+            const foundUser = users.find(user => 
+                user.username === usernameInput && user.password === passwordInput
+            );
+
+            if (foundUser) {
+                showMessage(messageDiv, `Selamat datang, ${foundUser.username}! Role Anda adalah: ${foundUser.role}.`, false);
+            } else {
+                showMessage(messageDiv, 'Username atau password salah.', true);
+            }
+        });
+
+        // Menangani klik pada link "Lupa Password"
+        forgotPasswordLink.addEventListener('click', function(event) {
+            event.preventDefault();
+            loginForm.classList.add('hidden');
+            resetForm.classList.remove('hidden');
+            formTitle.textContent = 'Reset Password';
+            messageDiv.textContent = '';
+        });
+        
+        // Menangani pengiriman formulir reset password
+        resetForm.addEventListener('submit', function(event) {
+            event.preventDefault();
+            const emailInput = document.getElementById('email').value;
+
+            const foundUser = users.find(user => user.email === emailInput);
+
+            if (foundUser) {
+                showMessage(resetMessageDiv, `Email reset password telah dikirim ke ${foundUser.email}.`, false);
+            } else {
+                showMessage(resetMessageDiv, 'Email tidak ditemukan.', true);
+            }
+        });
+
+        // Menangani klik pada link "Kembali ke Login"
+        backToLoginLink.addEventListener('click', function(event) {
+            event.preventDefault();
+            resetForm.classList.add('hidden');
+            loginForm.classList.remove('hidden');
+            formTitle.textContent = 'Login';
+            resetMessageDiv.textContent = '';
+        });
+    </script>
 </body>
 </html>
