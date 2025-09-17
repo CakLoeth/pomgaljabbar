@@ -198,10 +198,17 @@
                <span class="text-sm lg:text-base">Keluar</span>
                </a>
 
-               <script>
-               document.getElementById("keluar-btn").addEventListener("click", function(e) {
+               <script type="module">
+               import { getAuth, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+               const auth = getAuth();
+               document.getElementById("keluar-btn").addEventListener("click", async (e) => {
                e.preventDefault();
-               window.location.href = "index.html"; // redirect ke login
+               try {
+               await signOut(auth); // benar-benar hapus session login Firebase
+               window.location.href = "index.html"; // redirect ke halaman login
+               } catch (error) {
+               console.error("Gagal logout:", error);
+               }
                });
                </script>
             </nav>
